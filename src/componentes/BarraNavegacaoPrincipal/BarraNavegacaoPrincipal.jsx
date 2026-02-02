@@ -13,6 +13,16 @@ import {
     ListaNavegacao,
     BotaoHamburguer,
     LinhaHamburguer,
+    ItemNavegacao,
+    IconeItem,
+    ContadorIndicador,
+    BotaoSocial,
+    DivisorMenu,
+    DescricaoItem,
+    ContainerRedesSociais,
+    TituloRedesSociais,
+    GrupoRedesSociais,
+    ItemNavegacaoDesktop,
 } from './styles'
 
 import logoHeader from '../../assets/img/logo-header.png'
@@ -90,26 +100,77 @@ const BarraNavegacaoPrincipal = () => {
 
                 {/* Links de navegação */}
                 <ListaNavegacao id="menu-principal" $aberto={menuAberto}>
-                    <li>
+                    {/* DESKTOP - Links simples */}
+                    <ItemNavegacaoDesktop>
+                        <a href="#home" onClick={handleLinkScroll}>Home</a>
+                    </ItemNavegacaoDesktop>
+                    <ItemNavegacaoDesktop>
+                        <a href="#books" onClick={handleLinkScroll}>Books</a>
+                    </ItemNavegacaoDesktop>
+                    <ItemNavegacaoDesktop>
+                        <a href="#about" onClick={handleLinkScroll}>About</a>
+                    </ItemNavegacaoDesktop>
+                    <ItemNavegacaoDesktop>
+                        <a href="#contact" onClick={handleLinkScroll}>Contact</a>
+                    </ItemNavegacaoDesktop>
+
+                    {/* MOBILE - Com ícones e descrições */}
+                    <ItemNavegacao>
                         <a href="#home" onClick={handleLinkScroll}>
-                            Home
+                            <IconeItem>🏠</IconeItem>
+                            <div>
+                                <strong>Home</strong>
+                                <DescricaoItem>Voltar ao início</DescricaoItem>
+                            </div>
                         </a>
-                    </li>
-                    <li>
+                    </ItemNavegacao>
+
+                    <ItemNavegacao>
                         <a href="#books" onClick={handleLinkScroll}>
-                            Books
+                            <IconeItem>📚</IconeItem>
+                            <div>
+                                <strong>Books</strong>
+                                <DescricaoItem>Nossos livros Oxford</DescricaoItem>
+                            </div>
                         </a>
-                    </li>
-                    <li>
+                    </ItemNavegacao>
+
+                    <ItemNavegacao>
                         <a href="#about" onClick={handleLinkScroll}>
-                            About
+                            <IconeItem>ℹ️</IconeItem>
+                            <div>
+                                <strong>About</strong>
+                                <DescricaoItem>Sobre o curso</DescricaoItem>
+                            </div>
                         </a>
-                    </li>
-                    <li>
+                    </ItemNavegacao>
+
+                    <ItemNavegacao>
                         <a href="#contact" onClick={handleLinkScroll}>
-                            Contact
+                            <IconeItem>✉️</IconeItem>
+                            <div>
+                                <strong>Contact</strong>
+                                <DescricaoItem>Entre em contato</DescricaoItem>
+                            </div>
                         </a>
-                    </li>
+                    </ItemNavegacao>
+
+                    <DivisorMenu />
+
+                    <ContainerRedesSociais>
+                        <TituloRedesSociais>REDES SOCIAIS</TituloRedesSociais>
+                        <GrupoRedesSociais>
+                            <BotaoSocial href="#" aria-label="Instagram">
+                                📱
+                            </BotaoSocial>
+                            <BotaoSocial href="#" aria-label="Facebook">
+                                f
+                            </BotaoSocial>
+                            <BotaoSocial href="#" aria-label="WhatsApp">
+                                💬
+                            </BotaoSocial>
+                        </GrupoRedesSociais>
+                    </ContainerRedesSociais>
                 </ListaNavegacao>
             </ContainerPrincipal>
         </BarraNavegacao>

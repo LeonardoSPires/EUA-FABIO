@@ -65,7 +65,7 @@ export const TrackCarrossel = styled.div`
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  transition: ${(props) => (props.$semTransicao ? 'none' : 'opacity 0.3s ease')};
+  transition: ${(props) => (props.$semTransicao || props.$dragAtivo ? 'none' : 'opacity 0.3s ease')};
   transform-style: preserve-3d;
 `
 
@@ -75,13 +75,18 @@ export const ItemLivro = styled.div`
   justify-content: center;
   align-items: center;
   padding: 0 1rem;
-  transition: transform 0.5s ease, opacity 0.5s ease;
-
+  transition: ${(props) => props.$distanciaDrag !== 0 ? 'none' : 'transform 0.5s ease, opacity 0.5s ease'};
   transform: ${(props) => {
-        if (props.$posicao === 'esquerda') return 'scale(0.9) rotateY(-45deg)'
-        if (props.$posicao === 'centro') return 'scale(1) rotateY(0deg)'
-        if (props.$posicao === 'direita') return 'scale(0.9) rotateY(45deg)'
-        return 'scale(0.9)'
+  let baseTransform = ''
+  if (props.$posicao === 'esquerda') baseTransform = 'scale(0.9) rotateY(-45deg)'
+  else if (props.$posicao === 'centro') baseTransform = 'scale(1) rotateY(0deg)'
+  else if (props.$posicao === 'direita') baseTransform = 'scale(0.9) rotateY(45deg)'
+  else baseTransform = 'scale(0.9)'
+
+  if (props.$distanciaDrag !== 0 && props.$posicao === 'centro') {
+    return `${baseTransform} translateX(${props.$distanciaDrag * 0.5}px)`
+  }
+  return baseTransform
     }};
   transform-style: preserve-3d;
   opacity: ${(props) => (props.$posicao === 'centro' ? 1 : 0.8)};
@@ -91,10 +96,16 @@ export const ItemLivro = styled.div`
     min-width: 40%;
     padding: 0 0.25rem;
     transform: ${(props) => {
-        if (props.$posicao === 'esquerda') return 'scale(0.85) rotateY(-65deg)'
-        if (props.$posicao === 'centro') return 'scale(1) rotateY(0deg)'
-        if (props.$posicao === 'direita') return 'scale(0.85) rotateY(65deg)'
-        return 'scale(0.75)'
+  let baseTransform = ''
+  if (props.$posicao === 'esquerda') baseTransform = 'scale(0.85) rotateY(-65deg)'
+  else if (props.$posicao === 'centro') baseTransform = 'scale(1) rotateY(0deg)'
+  else if (props.$posicao === 'direita') baseTransform = 'scale(0.85) rotateY(65deg)'
+  else baseTransform = 'scale(0.75)'
+
+  if (props.$distanciaDrag !== 0 && props.$posicao === 'centro') {
+    return `${baseTransform} translateX(${props.$distanciaDrag * 0.5}px)`
+  }
+  return baseTransform
     }};
   }
 `
@@ -107,8 +118,8 @@ export const ImagemLivro = styled.img`
   border-radius: 12px;
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3), 
               0 10px 25px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
-  cursor: pointer;
+  transition: ${(props) => (props.$dragAtivo ? 'none' : 'transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease')};
+  cursor: ${(props) => (props.$dragAtivo ? 'grabbing' : 'grab')};
   position: relative;
   z-index: ${(props) => (props.$posicao === 'centro' ? 10 : 1)};
   animation: ${(props) => {
@@ -123,8 +134,8 @@ export const ImagemLivro = styled.img`
     }} 0.7s ease;
 
   &:hover {
-    transform: ${(props) => (props.$posicao === 'centro' ? 'scale(1.05) translateY(-5px)' : 'none')};
-    box-shadow: ${(props) => (props.$posicao === 'centro'
+    transform: ${(props) => (props.$posicao === 'centro' && !props.$dragAtivo ? 'scale(1.05) translateY(-5px)' : 'none')};
+    box-shadow: ${(props) => (props.$posicao === 'centro' && !props.$dragAtivo
         ? '0 15px 25px rgba(0, 0, 0, 0.4), 0 15px 30px rgba(0, 0, 0, 0.25)'
         : '0 10px 15px rgba(0, 0, 0, 0.3), 0 10px 25px rgba(0, 0, 0, 0.2)')};
   }

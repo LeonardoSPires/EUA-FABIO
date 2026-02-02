@@ -48,6 +48,10 @@ const CarrosselLivros = () => {
     const [bloquearAnimacao, setBloquearAnimacao] = useState(false)
     const [indicadorAtivo, setIndicadorAtivo] = useState(0)
     const [direcaoSlide, setDirecaoSlide] = useState('right')
+    const [touchInicio, setTouchInicio] = useState(0)
+    const [touchFim, setTouchFim] = useState(0)
+    const [dragAtivo, setDragAtivo] = useState(false)
+    const [distanciaDrag, setDistanciaDrag] = useState(0)
 
     const obterLivro = (offset) => {
         const indice = (indiceAtual + offset + livros.length) % livros.length
@@ -74,6 +78,48 @@ const CarrosselLivros = () => {
         setIndiceAtual(indiceInicial + indice)
         setIndicadorAtivo(indice)
     }
+
+    // Handlers para Touch (Mobile)
+    const handleTouchStart = (e) => {
+        setTouchInicio(e.touches[0].clientX)
+        setDragAtivo(true)
+        setDistanciaDrag(0)
+    }
+
+    const handleTouchMove = (e) => {
+        if (!dragAtivo) return
+        const distancia = e.touches[0].clientX - touchInicio
+        setDistanciaDrag(distancia)
+    }
+
+    const handleTouchEnd = (e) => {
+        setDragAtivo(false)
+        setTouchFim(e.changedTouches[0].clientX)
+        const diferenca = touchInicio - e.changedTouches[0].clientX
+        const limiteSwipe = 50
+
+        if (diferenca > limiteSwipe) {
+            proximoLivro()
+        } else if (diferenca < -limiteSwipe) {
+            livroAnterior()
+        }
+
+        setDistanciaDrag(0)
+    }
+
+    // Handler para Teclado (Arrow Keys)
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'ArrowRight') {
+                proximoLivro()
+            } else if (e.key === 'ArrowLeft') {
+                livroAnterior()
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [bloquearAnimacao])
 
     useEffect(() => {
         if (indiceAtual >= indiceInicial + totalLivrosOriginais) {
@@ -104,7 +150,11 @@ const CarrosselLivros = () => {
 
     return (
         <>
-            <ContainerCarrossel>
+            <ContainerCarrossel
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+            >
                 <BotaoNavegacao
                     $esquerda
                     onClick={livroAnterior}
@@ -113,18 +163,19 @@ const CarrosselLivros = () => {
                     ‹
                 </BotaoNavegacao>
 
-                <TrackCarrossel $semTransicao={semTransicao}>
+                <TrackCarrossel $semTransicao={semTransicao} $dragAtivo={dragAtivo}>
                     {[
                         { posicao: 'esquerda', livro: obterLivro(1) },
                         { posicao: 'centro', livro: obterLivro(0) },
                         { posicao: 'direita', livro: obterLivro(-1) },
                     ].map(({ posicao, livro }) => (
-                        <ItemLivro key={posicao} $posicao={posicao}>
+                        <ItemLivro key={posicao} $posicao={posicao} $distanciaDrag={dragAtivo ? distanciaDrag : 0}>
                             <ImagemLivro
                                 $posicao={posicao}
                                 $direcao={direcaoSlide}
                                 $semTransicao={semTransicao}
                                 $bloquearAnimacao={bloquearAnimacao}
+                                $dragAtivo={dragAtivo}
                                 key={livro.idUnico}
                                 src={livro.imagem}
                                 alt={livro.titulo}
