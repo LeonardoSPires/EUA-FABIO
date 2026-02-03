@@ -26,6 +26,7 @@ import {
 } from './styles'
 
 import logoHeader from '../../assets/img/logo-header.png'
+import whatsappIcon from '../../assets/img/whatsapp-icon.svg'
 
 const BarraNavegacaoPrincipal = () => {
     /**
@@ -57,7 +58,8 @@ const BarraNavegacaoPrincipal = () => {
      */
     const handleLinkScroll = (evento) => {
         evento.preventDefault()
-        const alvo = evento.target.getAttribute('href')
+        // Usa currentTarget para sempre pegar o elemento <a> mesmo se clicar em elementos filhos
+        const alvo = evento.currentTarget.getAttribute('href')
         const elemento = document.querySelector(alvo)
 
         if (elemento) {
@@ -160,14 +162,11 @@ const BarraNavegacaoPrincipal = () => {
                     <ContainerRedesSociais>
                         <TituloRedesSociais>REDES SOCIAIS</TituloRedesSociais>
                         <GrupoRedesSociais>
-                            <BotaoSocial href="#" aria-label="Instagram">
-                                📱
+                            <BotaoSocial href="https://www.instagram.com/english.unlimited.for.adults/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                                📸
                             </BotaoSocial>
-                            <BotaoSocial href="#" aria-label="Facebook">
-                                f
-                            </BotaoSocial>
-                            <BotaoSocial href="#" aria-label="WhatsApp">
-                                💬
+                            <BotaoSocial href="https://wa.me/5524992795300?text=Hello, I want to start the course!" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                                <img src={whatsappIcon} alt="WhatsApp" style={{ width: '24px', height: '24px' }} />
                             </BotaoSocial>
                         </GrupoRedesSociais>
                     </ContainerRedesSociais>
