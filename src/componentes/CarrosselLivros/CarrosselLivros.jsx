@@ -1,8 +1,8 @@
 /**
  * Componente: CarrosselLivros
- * Carrossel 3D interativo com os 5 livros Oxford
+ * Carrossel 3D interativo com os 5 livros Oxford (Otimizado)
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
     ContainerCarrossel,
     TrackCarrossel,
@@ -20,112 +20,95 @@ import livro4 from '../../assets/img/livro-oxford4.jpg'
 import livro5 from '../../assets/img/livro-oxford5.jpg'
 
 const CarrosselLivros = () => {
-    const livrosOriginais = [
+    // Dados memorizados (não mudam)
+    const livrosOriginais = useMemo(() => [
         { id: 1, imagem: livro1, titulo: 'Oxford Book 1' },
         { id: 2, imagem: livro2, titulo: 'Oxford Book 2' },
         { id: 3, imagem: livro3, titulo: 'Oxford Book 3' },
         { id: 4, imagem: livro4, titulo: 'Oxford Book 4' },
         { id: 5, imagem: livro5, titulo: 'Oxford Book 5' },
-    ]
+    ], [])
 
-    const livros = [
-        { ...livrosOriginais[3], idUnico: -2 },
-        { ...livrosOriginais[4], idUnico: -1 },
-        { ...livrosOriginais[0], idUnico: 0 },
-        { ...livrosOriginais[1], idUnico: 1 },
-        { ...livrosOriginais[2], idUnico: 2 },
-        { ...livrosOriginais[3], idUnico: 3 },
-        { ...livrosOriginais[4], idUnico: 4 },
-        { ...livrosOriginais[0], idUnico: 5 },
-        { ...livrosOriginais[1], idUnico: 6 },
-    ]
+    const { livros, totalLivrosOriginais, indiceInicial } = useMemo(() => {
+        const total = livrosOriginais.length
+        const inicio = 2
+        const livrosComClones = [
+            { ...livrosOriginais[3], idUnico: -2 },
+            { ...livrosOriginais[4], idUnico: -1 },
+            { ...livrosOriginais[0], idUnico: 0 },
+            { ...livrosOriginais[1], idUnico: 1 },
+            { ...livrosOriginais[2], idUnico: 2 },
+            { ...livrosOriginais[3], idUnico: 3 },
+            { ...livrosOriginais[4], idUnico: 4 },
+            { ...livrosOriginais[0], idUnico: 5 },
+            { ...livrosOriginais[1], idUnico: 6 },
+        ]
+        return { livros: livrosComClones, totalLivrosOriginais: total, indiceInicial: inicio }
+    }, [livrosOriginais])
 
-    const totalLivrosOriginais = livrosOriginais.length
-    const indiceInicial = 2
-
+    // Estados consolidados
     const [indiceAtual, setIndiceAtual] = useState(indiceInicial)
-    const [semTransicao, setSemTransicao] = useState(false)
-    const [bloquearAnimacao, setBloquearAnimacao] = useState(false)
+    const [transicao, setTransicao] = useState({ sem: false, bloqueada: false })
     const [indicadorAtivo, setIndicadorAtivo] = useState(0)
     const [direcaoSlide, setDirecaoSlide] = useState('right')
-    const [touchInicio, setTouchInicio] = useState(0)
-    const [touchFim, setTouchFim] = useState(0)
-    const [dragAtivo, setDragAtivo] = useState(false)
-    const [distanciaDrag, setDistanciaDrag] = useState(0)
+    const [drag, setDrag] = useState({ ativo: false, inicio: 0, distancia: 0 })
 
-    const obterLivro = (offset) => {
+    // Função consolidada de navegação
+    const navegarCarrossel = useCallback((direcao) => {
+        setTransicao({ sem: false, bloqueada: false })
+        setDirecaoSlide(direcao > 0 ? 'right' : 'left')
+        setIndiceAtual(prev => prev + direcao)
+        setIndicadorAtivo(prev => (prev + direcao + totalLivrosOriginais) % totalLivrosOriginais)
+    }, [totalLivrosOriginais])
+
+    const obterLivro = useCallback((offset) => {
         const indice = (indiceAtual + offset + livros.length) % livros.length
         return livros[indice]
-    }
+    }, [indiceAtual, livros])
 
-    const proximoLivro = () => {
-        setBloquearAnimacao(false)
-        setDirecaoSlide('right')
-        setIndiceAtual((prev) => prev + 1)
-        setIndicadorAtivo((prev) => (prev + 1) % totalLivrosOriginais)
-    }
-
-    const livroAnterior = () => {
-        setBloquearAnimacao(false)
-        setDirecaoSlide('left')
-        setIndiceAtual((prev) => prev - 1)
-        setIndicadorAtivo((prev) => (prev - 1 + totalLivrosOriginais) % totalLivrosOriginais)
-    }
-
-    const irParaLivro = (indice) => {
-        setBloquearAnimacao(false)
+    const irParaLivro = useCallback((indice) => {
+        setTransicao({ sem: false, bloqueada: false })
         setDirecaoSlide(indice > indicadorAtivo ? 'right' : 'left')
         setIndiceAtual(indiceInicial + indice)
         setIndicadorAtivo(indice)
-    }
+    }, [indicadorAtivo, indiceInicial])
 
-    // Handlers para Touch (Mobile)
-    const handleTouchStart = (e) => {
-        setTouchInicio(e.touches[0].clientX)
-        setDragAtivo(true)
-        setDistanciaDrag(0)
-    }
+    // Handlers touch unificados
+    const handleTouchStart = useCallback((e) => {
+        setDrag({ ativo: true, inicio: e.touches[0].clientX, distancia: 0 })
+    }, [])
 
-    const handleTouchMove = (e) => {
-        if (!dragAtivo) return
-        const distancia = e.touches[0].clientX - touchInicio
-        setDistanciaDrag(distancia)
-    }
+    const handleTouchMove = useCallback((e) => {
+        if (!drag.ativo) return
+        setDrag(prev => ({ ...prev, distancia: e.touches[0].clientX - prev.inicio }))
+    }, [drag.ativo])
 
-    const handleTouchEnd = (e) => {
-        setDragAtivo(false)
-        setTouchFim(e.changedTouches[0].clientX)
-        const diferenca = touchInicio - e.changedTouches[0].clientX
+    const handleTouchEnd = useCallback((e) => {
+        const diferenca = drag.inicio - e.changedTouches[0].clientX
         const limiteSwipe = 50
 
-        if (diferenca > limiteSwipe) {
-            proximoLivro()
-        } else if (diferenca < -limiteSwipe) {
-            livroAnterior()
-        }
+        if (diferenca > limiteSwipe) navegarCarrossel(1)
+        else if (diferenca < -limiteSwipe) navegarCarrossel(-1)
 
-        setDistanciaDrag(0)
-    }
+        setDrag({ ativo: false, inicio: 0, distancia: 0 })
+    }, [drag.inicio, navegarCarrossel])
 
-    // Handler para Teclado (Arrow Keys)
+    // Handler de teclado
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (e.key === 'ArrowRight') {
-                proximoLivro()
-            } else if (e.key === 'ArrowLeft') {
-                livroAnterior()
-            }
+            if (e.key === 'ArrowRight') navegarCarrossel(1)
+            else if (e.key === 'ArrowLeft') navegarCarrossel(-1)
         }
 
         window.addEventListener('keydown', handleKeyDown)
         return () => window.removeEventListener('keydown', handleKeyDown)
-    }, [bloquearAnimacao])
+    }, [navegarCarrossel])
 
+    // Loop infinito
     useEffect(() => {
         if (indiceAtual >= indiceInicial + totalLivrosOriginais) {
             const timeout = setTimeout(() => {
-                setSemTransicao(true)
-                setBloquearAnimacao(true)
+                setTransicao({ sem: true, bloqueada: true })
                 setIndiceAtual(indiceInicial)
             }, 500)
             return () => clearTimeout(timeout)
@@ -133,20 +116,17 @@ const CarrosselLivros = () => {
 
         if (indiceAtual < indiceInicial) {
             const timeout = setTimeout(() => {
-                setSemTransicao(true)
-                setBloquearAnimacao(true)
+                setTransicao({ sem: true, bloqueada: true })
                 setIndiceAtual(indiceInicial + totalLivrosOriginais - 1)
             }, 500)
             return () => clearTimeout(timeout)
         }
 
-        if (semTransicao) {
-            const timeout = setTimeout(() => {
-                setSemTransicao(false)
-            }, 50)
+        if (transicao.sem) {
+            const timeout = setTimeout(() => setTransicao(prev => ({ ...prev, sem: false })), 50)
             return () => clearTimeout(timeout)
         }
-    }, [indiceAtual, semTransicao, totalLivrosOriginais, indiceInicial])
+    }, [indiceAtual, transicao.sem, totalLivrosOriginais, indiceInicial])
 
     return (
         <>
@@ -157,25 +137,29 @@ const CarrosselLivros = () => {
             >
                 <BotaoNavegacao
                     $esquerda
-                    onClick={livroAnterior}
+                    onClick={() => navegarCarrossel(-1)}
                     aria-label="Previous book"
                 >
                     ‹
                 </BotaoNavegacao>
 
-                <TrackCarrossel $semTransicao={semTransicao} $dragAtivo={dragAtivo}>
+                <TrackCarrossel $semTransicao={transicao.sem} $dragAtivo={drag.ativo}>
                     {[
                         { posicao: 'esquerda', livro: obterLivro(1) },
                         { posicao: 'centro', livro: obterLivro(0) },
                         { posicao: 'direita', livro: obterLivro(-1) },
                     ].map(({ posicao, livro }) => (
-                        <ItemLivro key={posicao} $posicao={posicao} $distanciaDrag={dragAtivo ? distanciaDrag : 0}>
+                        <ItemLivro
+                            key={posicao}
+                            $posicao={posicao}
+                            $distanciaDrag={drag.ativo ? drag.distancia : 0}
+                        >
                             <ImagemLivro
                                 $posicao={posicao}
                                 $direcao={direcaoSlide}
-                                $semTransicao={semTransicao}
-                                $bloquearAnimacao={bloquearAnimacao}
-                                $dragAtivo={dragAtivo}
+                                $semTransicao={transicao.sem}
+                                $bloquearAnimacao={transicao.bloqueada}
+                                $dragAtivo={drag.ativo}
                                 key={livro.idUnico}
                                 src={livro.imagem}
                                 alt={livro.titulo}
@@ -187,7 +171,7 @@ const CarrosselLivros = () => {
 
                 <BotaoNavegacao
                     $direita
-                    onClick={proximoLivro}
+                    onClick={() => navegarCarrossel(1)}
                     aria-label="Next book"
                 >
                     ›

@@ -5,6 +5,7 @@
  * Links diretos para WhatsApp e Instagram
  */
 
+import { useMemo } from 'react'
 import {
     SecaoContato,
     ContainerPrincipal,
@@ -13,28 +14,10 @@ import {
     ConteinerBotoes,
     Botao,
 } from './styles'
+import { CONTATOS } from '../../constants/dados'
 
 const SecaoContatoPrincipal = () => {
-    /**
-     * Dados de contato
-     * URLs estão configuradas com a formatação de prévia de mensagem
-     */
-    const contatos = [
-        {
-            id: 1,
-            tipo: 'whatsapp',
-            label: 'WhatsApp',
-            icone: '💬',
-            url: 'https://wa.me/5524992795300?text=Hello,%20I%20want%20to%20start%20the%20course!',
-        },
-        {
-            id: 2,
-            tipo: 'instagram',
-            label: 'Instagram',
-            icone: '📸',
-            url: 'https://www.instagram.com/english.unlimited.for.adults/',
-        },
-    ]
+    const contatos = useMemo(() => CONTATOS, [])
 
     return (
         <SecaoContato id="contact">

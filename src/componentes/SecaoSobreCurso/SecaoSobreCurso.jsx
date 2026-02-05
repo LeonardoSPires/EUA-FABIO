@@ -5,6 +5,7 @@
  * Estrutura: 4 cards em grid responsivo
  */
 
+import { useMemo } from 'react'
 import {
     SecaoSobre,
     ContainerPrincipal,
@@ -12,38 +13,10 @@ import {
     GradeItens,
     CartaoItem,
 } from './styles'
+import { DIFERENCIAIS_CURSO } from '../../constants/dados'
 
 const SecaoSobreCurso = () => {
-    /**
-     * Dados dos diferenciais do curso
-     * Cada item contém: ícone, título e descrição
-     */
-    const diferenciais = [
-        {
-            id: 1,
-            icone: '🎯',
-            titulo: 'Oxford Method',
-            descricao: 'We use the Oxford method, recognized worldwide for its effectiveness in teaching English.',
-        },
-        {
-            id: 2,
-            icone: '👥',
-            titulo: 'For Adults',
-            descricao: 'Classes specially adapted for adults who want to learn English in a practical and objective way.',
-        },
-        {
-            id: 3,
-            icone: '🌍',
-            titulo: 'Unlimited English',
-            descricao: 'No limits to learning. Flexible and personalized classes according to your needs.',
-        },
-        {
-            id: 4,
-            icone: '👨‍🏫',
-            titulo: 'Experienced Teacher',
-            descricao: 'Classes with a private teacher dedicated to your learning and development.',
-        },
-    ]
+    const diferenciais = useMemo(() => DIFERENCIAIS_CURSO, [])
 
     return (
         <SecaoSobre id="about">

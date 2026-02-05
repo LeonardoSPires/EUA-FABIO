@@ -7,7 +7,7 @@
  * - Botões de ação (Comece Agora e Saiba Mais)
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
     SecaoHeroi,
     ContainerTitulo,
@@ -18,27 +18,26 @@ import {
     TituloGrande,
     Overlay,
 } from './styles'
+import { useScrollSmooth } from '../../hooks/useScrollSmooth'
+
 import logoFabio from '../../assets/img/logo-principal.png'
 
 const SecaoHeroiPrincipal = () => {
-    /**
-     * Estado para controlar qual imagem mostrar
-     * true = oxford-colorida, false = oxford-pretaebranca
-     */
     const [mostrarPrimeiraImagem, setMostrarPrimeiraImagem] = useState(true)
+    const scrollSmooth = useScrollSmooth()
 
-    /**
-     * useEffect que executa uma vez quando o componente monta
-     * Após 2 segundos, troca para a segunda imagem
-     */
     useEffect(() => {
         const timer = setTimeout(() => {
             setMostrarPrimeiraImagem(false)
-        }, 2000) // 2000ms = 2 segundos
+        }, 2000)
 
-        // Cleanup: limpa o timer se o componente for desmontado
         return () => clearTimeout(timer)
-    }, []) // Array vazio [] = executa apenas uma vez
+    }, [])
+
+    const handleBotaoClick = useCallback((e, targetId) => {
+        e.preventDefault()
+        scrollSmooth(`#${targetId}`)
+    }, [scrollSmooth])
 
     return (
         <SecaoHeroi id="home" $mostrarPrimeiraImagem={mostrarPrimeiraImagem}>
@@ -62,10 +61,7 @@ const SecaoHeroiPrincipal = () => {
                         $primario
                         as="a"
                         href="#contact"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            document.querySelector('#contact').scrollIntoView({ behavior: 'smooth' })
-                        }}
+                        onClick={(e) => handleBotaoClick(e, 'contact')}
                     >
                         Get Started
                     </Botao>
@@ -74,10 +70,7 @@ const SecaoHeroiPrincipal = () => {
                         $secundario
                         as="a"
                         href="#about"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            document.querySelector('#about').scrollIntoView({ behavior: 'smooth' })
-                        }}
+                        onClick={(e) => handleBotaoClick(e, 'about')}
                     >
                         Learn More
                     </Botao>

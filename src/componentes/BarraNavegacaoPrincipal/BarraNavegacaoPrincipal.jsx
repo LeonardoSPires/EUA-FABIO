@@ -5,7 +5,7 @@
  * Contém o logo, tagline e links de navegação
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
     BarraNavegacao,
     ContainerPrincipal,
@@ -15,7 +15,6 @@ import {
     LinhaHamburguer,
     ItemNavegacao,
     IconeItem,
-    ContadorIndicador,
     BotaoSocial,
     DivisorMenu,
     DescricaoItem,
@@ -24,61 +23,41 @@ import {
     GrupoRedesSociais,
     ItemNavegacaoDesktop,
 } from './styles'
+import { useScrollSmooth } from '../../hooks/useScrollSmooth'
+import { LINKS_NAVEGACAO, CONTATOS } from '../../constants/dados'
 
 import logoHeader from '../../assets/img/logo-header.png'
 import whatsappIcon from '../../assets/img/whatsapp-icon.svg'
 
 const BarraNavegacaoPrincipal = () => {
-    /**
-     * Estado para controlar se o usuário fez scroll
-     */
     const [temScroll, setTemScroll] = useState(false)
     const [menuAberto, setMenuAberto] = useState(false)
+    const scrollSmooth = useScrollSmooth()
 
-    /**
-     * useEffect para detectar scroll na página
-     */
+    // Memoizar dados estáticos
+    const linksNavegacao = useMemo(() => LINKS_NAVEGACAO, [])
+    const contatosSociais = useMemo(() => CONTATOS, [])
+
     useEffect(() => {
         const handleScroll = () => {
-            // Se scrollou mais de 50px, muda a cor do header
-            if (window.scrollY > 50) {
-                setTemScroll(true)
-            } else {
-                setTemScroll(false)
-            }
+            setTemScroll(window.scrollY > 50)
         }
 
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
 
-    /**
-     * Função para scroll suave quando clicar em um link
-     * @param {Event} evento - Evento do clique
-     */
-    const handleLinkScroll = (evento) => {
+    const handleLinkScroll = useCallback((evento) => {
         evento.preventDefault()
-        // Usa currentTarget para sempre pegar o elemento <a> mesmo se clicar em elementos filhos
         const alvo = evento.currentTarget.getAttribute('href')
-        const elemento = document.querySelector(alvo)
-
-        if (elemento) {
-            elemento.scrollIntoView({ behavior: 'smooth' })
-        }
-
+        scrollSmooth(alvo)
         setMenuAberto(false)
-    }
+    }, [scrollSmooth])
 
-    /**
-     * Função para scroll ao home ao clicar no logo
-     */
-    const handleLogoClick = () => {
-        const homeElement = document.querySelector('#home')
-        if (homeElement) {
-            homeElement.scrollIntoView({ behavior: 'smooth' })
-        }
+    const handleLogoClick = useCallback(() => {
+        scrollSmooth('#home')
         setMenuAberto(false)
-    }
+    }, [scrollSmooth])
 
     return (
         <BarraNavegacao $temScroll={temScroll}>
@@ -103,71 +82,47 @@ const BarraNavegacaoPrincipal = () => {
                 {/* Links de navegação */}
                 <ListaNavegacao id="menu-principal" $aberto={menuAberto}>
                     {/* DESKTOP - Links simples */}
-                    <ItemNavegacaoDesktop>
-                        <a href="#home" onClick={handleLinkScroll}>Home</a>
-                    </ItemNavegacaoDesktop>
-                    <ItemNavegacaoDesktop>
-                        <a href="#books" onClick={handleLinkScroll}>Books</a>
-                    </ItemNavegacaoDesktop>
-                    <ItemNavegacaoDesktop>
-                        <a href="#about" onClick={handleLinkScroll}>About</a>
-                    </ItemNavegacaoDesktop>
-                    <ItemNavegacaoDesktop>
-                        <a href="#contact" onClick={handleLinkScroll}>Contact</a>
-                    </ItemNavegacaoDesktop>
+                    {linksNavegacao.map((link) => (
+                        <ItemNavegacaoDesktop key={link.id}>
+                            <a href={`#${link.id}`} onClick={handleLinkScroll}>
+                                {link.label}
+                            </a>
+                        </ItemNavegacaoDesktop>
+                    ))}
 
                     {/* MOBILE - Com ícones e descrições */}
-                    <ItemNavegacao>
-                        <a href="#home" onClick={handleLinkScroll}>
-                            <IconeItem>🏠</IconeItem>
-                            <div>
-                                <strong>Home</strong>
-                                <DescricaoItem>Voltar ao início</DescricaoItem>
-                            </div>
-                        </a>
-                    </ItemNavegacao>
-
-                    <ItemNavegacao>
-                        <a href="#books" onClick={handleLinkScroll}>
-                            <IconeItem>📚</IconeItem>
-                            <div>
-                                <strong>Books</strong>
-                                <DescricaoItem>Nossos livros Oxford</DescricaoItem>
-                            </div>
-                        </a>
-                    </ItemNavegacao>
-
-                    <ItemNavegacao>
-                        <a href="#about" onClick={handleLinkScroll}>
-                            <IconeItem>ℹ️</IconeItem>
-                            <div>
-                                <strong>About</strong>
-                                <DescricaoItem>Sobre o curso</DescricaoItem>
-                            </div>
-                        </a>
-                    </ItemNavegacao>
-
-                    <ItemNavegacao>
-                        <a href="#contact" onClick={handleLinkScroll}>
-                            <IconeItem>✉️</IconeItem>
-                            <div>
-                                <strong>Contact</strong>
-                                <DescricaoItem>Entre em contato</DescricaoItem>
-                            </div>
-                        </a>
-                    </ItemNavegacao>
+                    {linksNavegacao.map((link) => (
+                        <ItemNavegacao key={`mobile-${link.id}`}>
+                            <a href={`#${link.id}`} onClick={handleLinkScroll}>
+                                <IconeItem>{link.icone}</IconeItem>
+                                <div>
+                                    <strong>{link.label}</strong>
+                                    <DescricaoItem>{link.descricao}</DescricaoItem>
+                                </div>
+                            </a>
+                        </ItemNavegacao>
+                    ))}
 
                     <DivisorMenu />
 
                     <ContainerRedesSociais>
                         <TituloRedesSociais>REDES SOCIAIS</TituloRedesSociais>
                         <GrupoRedesSociais>
-                            <BotaoSocial href="https://www.instagram.com/english.unlimited.for.adults/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                                📸
-                            </BotaoSocial>
-                            <BotaoSocial href="https://wa.me/5524992795300?text=Hello, I want to start the course!" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-                                <img src={whatsappIcon} alt="WhatsApp" style={{ width: '24px', height: '24px' }} />
-                            </BotaoSocial>
+                            {contatosSociais.map((contato) => (
+                                <BotaoSocial
+                                    key={contato.id}
+                                    href={contato.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={contato.label}
+                                >
+                                    {contato.tipo === 'whatsapp' ? (
+                                        <img src={whatsappIcon} alt="WhatsApp" style={{ width: '24px', height: '24px' }} />
+                                    ) : (
+                                        contato.icone
+                                    )}
+                                </BotaoSocial>
+                            ))}
                         </GrupoRedesSociais>
                     </ContainerRedesSociais>
                 </ListaNavegacao>

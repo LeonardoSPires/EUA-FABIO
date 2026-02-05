@@ -1,4 +1,4 @@
-import styled, { keyframes } from 'styled-components'
+import styled, { keyframes, css } from 'styled-components'
 
 const slideInCenterRight = keyframes`
   from {
@@ -122,16 +122,30 @@ export const ImagemLivro = styled.img`
   cursor: ${(props) => (props.$dragAtivo ? 'grabbing' : 'grab')};
   position: relative;
   z-index: ${(props) => (props.$posicao === 'centro' ? 10 : 1)};
-  animation: ${(props) => {
-        if (props.$semTransicao || props.$bloquearAnimacao) return 'none'
-        if (props.$posicao === 'centro' && props.$direcao === 'left') return slideInCenterRight
-        if (props.$posicao === 'centro' && props.$direcao === 'right') return slideInCenterLeft
-        if (props.$posicao === 'esquerda' && props.$direcao === 'left') return slideSideRight
-        if (props.$posicao === 'esquerda' && props.$direcao === 'right') return slideSideLeft
-        if (props.$posicao === 'direita' && props.$direcao === 'left') return slideSideRight
-        if (props.$posicao === 'direita' && props.$direcao === 'right') return slideSideLeft
-        return 'none'
-    }} 0.7s ease;
+
+  ${(props) => {
+    if (props.$semTransicao || props.$bloquearAnimacao) return css``
+
+    if (props.$posicao === 'centro' && props.$direcao === 'left') {
+      return css`animation: ${slideInCenterRight} 0.7s ease;`
+    }
+    if (props.$posicao === 'centro' && props.$direcao === 'right') {
+      return css`animation: ${slideInCenterLeft} 0.7s ease;`
+    }
+    if (props.$posicao === 'esquerda' && props.$direcao === 'left') {
+      return css`animation: ${slideSideRight} 0.7s ease;`
+    }
+    if (props.$posicao === 'esquerda' && props.$direcao === 'right') {
+      return css`animation: ${slideSideLeft} 0.7s ease;`
+    }
+    if (props.$posicao === 'direita' && props.$direcao === 'left') {
+      return css`animation: ${slideSideRight} 0.7s ease;`
+    }
+    if (props.$posicao === 'direita' && props.$direcao === 'right') {
+      return css`animation: ${slideSideLeft} 0.7s ease;`
+    }
+    return css``
+  }}
 
   &:hover {
     transform: ${(props) => (props.$posicao === 'centro' && !props.$dragAtivo ? 'scale(1.05) translateY(-5px)' : 'none')};
