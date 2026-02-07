@@ -16,7 +16,7 @@ export const CONTATOS = [
     {
         id: 1,
         tipo: 'whatsapp',
-        label: '24 99395-5771',
+        label: 'WhatsApp',
         icone: '💬',
         url: 'https://wa.me/5524993955771?text=Hello,%20I%20want%20to%20start%20the%20course!',
     },
