@@ -14,10 +14,9 @@ import {
 } from './styles'
 
 import livro1 from '../../assets/img/livro-oxford1.jpg'
-import livro2 from '../../assets/img/livro-oxford2.jpg'
-import livro3 from '../../assets/img/livro-oxford3.jpg'
-import livro4 from '../../assets/img/livro-oxford4.jpg'
-import livro5 from '../../assets/img/livro-oxford5.jpg'
+import livro2 from '../../assets/img/libro-Metro-Level1.jpg'
+import livro3 from '../../assets/img/libro-Q3e-4Listening.jpg'
+import livro4 from '../../assets/img/livro-American-Angle1.jpg'
 
 const CarrosselLivros = () => {
     // Dados memorizados (não mudam)
@@ -26,23 +25,16 @@ const CarrosselLivros = () => {
         { id: 2, imagem: livro2, titulo: 'Oxford Book 2' },
         { id: 3, imagem: livro3, titulo: 'Oxford Book 3' },
         { id: 4, imagem: livro4, titulo: 'Oxford Book 4' },
-        { id: 5, imagem: livro5, titulo: 'Oxford Book 5' },
     ], [])
 
     const { livros, totalLivrosOriginais, indiceInicial } = useMemo(() => {
         const total = livrosOriginais.length
         const inicio = 2
-        const livrosComClones = [
-            { ...livrosOriginais[3], idUnico: -2 },
-            { ...livrosOriginais[4], idUnico: -1 },
-            { ...livrosOriginais[0], idUnico: 0 },
-            { ...livrosOriginais[1], idUnico: 1 },
-            { ...livrosOriginais[2], idUnico: 2 },
-            { ...livrosOriginais[3], idUnico: 3 },
-            { ...livrosOriginais[4], idUnico: 4 },
-            { ...livrosOriginais[0], idUnico: 5 },
-            { ...livrosOriginais[1], idUnico: 6 },
-        ]
+        const clonesInicio = livrosOriginais.slice(-2)
+        const clonesFim = livrosOriginais.slice(0, 2)
+        const livrosComClones = [...clonesInicio, ...livrosOriginais, ...clonesFim].map(
+            (livro, indice) => ({ ...livro, idUnico: indice - inicio })
+        )
         return { livros: livrosComClones, totalLivrosOriginais: total, indiceInicial: inicio }
     }, [livrosOriginais])
 

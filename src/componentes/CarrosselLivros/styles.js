@@ -114,7 +114,6 @@ export const ImagemLivro = styled.img`
   max-width: 280px;
   width: 100%;
   height: auto;
-  padding-bottom: 10px;
   border-radius: 12px;
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3), 
               0 10px 25px rgba(0, 0, 0, 0.2);
