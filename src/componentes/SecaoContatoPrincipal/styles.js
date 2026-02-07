@@ -71,6 +71,7 @@ export const ConteinerBotoes = styled.div`
  */
 export const Botao = styled.button`
   padding: 0.75rem 2rem;
+  width: 200px;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
